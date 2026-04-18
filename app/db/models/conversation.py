@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, Float
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
@@ -13,10 +13,10 @@ class Conversation(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     lead_id: Mapped[int] = mapped_column(ForeignKey("leads.id"), nullable=False, index=True)
     channel: Mapped[str] = mapped_column(String(100), default="webchat", nullable=False)
-    message_role: Mapped[str] = mapped_column(String(50), nullable=False)
+    message_role: Mapped[str] = mapped_column(String(50), nullable=False)  # user | assistant | system
     message_text: Mapped[str] = mapped_column(Text, nullable=False)
     intent: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    confidence_score: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    confidence_score: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
