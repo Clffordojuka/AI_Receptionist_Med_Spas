@@ -22,3 +22,16 @@ class LeadService:
         lead = self.get_lead(lead_id)
         update_data = payload.model_dump(exclude_unset=True)
         return self.repo.update(lead, update_data)
+
+    def patch_lead_fields(self, lead_id: int, update_data: dict):
+        lead = self.get_lead(lead_id)
+
+        safe_updates = {
+            key: value for key, value in update_data.items()
+            if value is not None and value != ""
+        }
+
+        if not safe_updates:
+            return lead
+
+        return self.repo.update(lead, safe_updates)

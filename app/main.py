@@ -2,7 +2,7 @@ import logging
 
 from fastapi import FastAPI
 
-from app.api.routes import health, leads, chat
+from app.api.routes import health, leads, chat, faq
 from app.config import get_settings
 from app.core.logging import setup_logging
 from app.db.base import Base
@@ -38,3 +38,4 @@ def root() -> dict:
 app.include_router(health.router, prefix=settings.api_v1_prefix)
 app.include_router(leads.router, prefix=settings.api_v1_prefix)
 app.include_router(chat.router, prefix=settings.api_v1_prefix)
+app.include_router(faq.router, prefix=settings.api_v1_prefix)

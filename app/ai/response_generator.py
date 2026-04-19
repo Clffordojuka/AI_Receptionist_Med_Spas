@@ -19,7 +19,11 @@ class ResponseGenerator:
         user_message: str,
         detected_intent: str,
         conversation_history: list[dict],
+        faq_answer: str | None = None,
     ) -> str:
+        if faq_answer:
+            return faq_answer
+
         if self.client:
             try:
                 return self._generate_with_openai(
