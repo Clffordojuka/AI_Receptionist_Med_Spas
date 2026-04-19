@@ -18,6 +18,7 @@ class Appointment(Base):
     provider_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     calendar_event_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     booking_status: Mapped[str] = mapped_column(String(50), default=BookingStatus.PENDING, nullable=False)
+    notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
