@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, Integer, String
+from sqlalchemy import Boolean, DateTime, Integer, String, Text
 from sqlalchemy.sql import func
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -34,6 +34,10 @@ class Lead(Base):
         default=LeadStatus.NEW,
         nullable=False,
     )
+
+    assigned_to: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    admin_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    handoff_requested: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     last_contacted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(

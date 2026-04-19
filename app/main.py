@@ -2,7 +2,7 @@ import logging
 
 from fastapi import FastAPI
 
-from app.api.routes import health, leads, chat, faq, bookings, followups
+from app.api.routes import health, leads, chat, faq, bookings, followups, admin
 from app.config import get_settings
 from app.core.logging import setup_logging
 from app.db.base import Base
@@ -41,3 +41,4 @@ app.include_router(chat.router, prefix=settings.api_v1_prefix)
 app.include_router(faq.router, prefix=settings.api_v1_prefix)
 app.include_router(bookings.router, prefix=settings.api_v1_prefix)
 app.include_router(followups.router, prefix=settings.api_v1_prefix)
+app.include_router(admin.router, prefix=settings.api_v1_prefix)

@@ -21,6 +21,9 @@ class LeadUpdate(BaseModel):
     qualification_status: str | None = None
     booking_status: str | None = None
     lead_status: str | None = None
+    assigned_to: str | None = None
+    admin_notes: str | None = None
+    handoff_requested: bool | None = None
 
 
 class LeadResponse(BaseModel):
@@ -34,6 +37,9 @@ class LeadResponse(BaseModel):
     qualification_status: str
     booking_status: str
     lead_status: str
+    assigned_to: str | None
+    admin_notes: str | None
+    handoff_requested: bool
     created_at: datetime
     updated_at: datetime
 
