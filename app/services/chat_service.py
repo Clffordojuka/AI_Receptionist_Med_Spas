@@ -8,6 +8,7 @@ from app.core.exceptions import NotFoundError
 from app.db.repositories.conversation_repository import ConversationRepository
 from app.db.repositories.lead_repository import LeadRepository
 from app.services.faq_service import FAQService
+from app.services.followup_service import FollowUpService
 from app.services.lead_service import LeadService
 
 
@@ -19,6 +20,7 @@ class ChatService:
         self.conversation_repo = ConversationRepository(db)
         self.response_generator = ResponseGenerator()
         self.faq_service = FAQService(db)
+        self.followup_service = FollowUpService(db)
 
     def process_message(self, *, lead_id: int, message: str, channel: str):
         lead = self.lead_repo.get_by_id(lead_id)
@@ -80,6 +82,10 @@ class ChatService:
         )
 
         updated_lead = self.lead_repo.get_by_id(lead_id)
+
+        if updated_lead and updated_lead.lead_status != LeadStatus.BOOKED:
+            if detected_intent in {"qualification", "booking", "general_inquiry", "faq"}:
+                self.followup_service.auto_schedule_initial_followup(lead_id)
 
         return {
             "lead_id": lead_id,

@@ -18,3 +18,10 @@ class QualificationStatus:
     IN_PROGRESS = "in_progress"
     QUALIFIED = "qualified"
     NOT_QUALIFIED = "not_qualified"
+
+
+class FollowUpStatus:
+    PENDING = "pending"
+    SENT = "sent"
+    CANCELLED = "cancelled"
+    FAILED = "failed"

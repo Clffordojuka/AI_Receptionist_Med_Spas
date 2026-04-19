@@ -5,6 +5,7 @@ from app.core.exceptions import NotFoundError, ValidationError
 from app.db.repositories.appointment_repository import AppointmentRepository
 from app.db.repositories.lead_repository import LeadRepository
 from app.services.calendar_service import CalendarService
+from app.services.followup_service import FollowUpService
 from app.services.lead_service import LeadService
 
 
@@ -15,6 +16,7 @@ class BookingService:
         self.lead_service = LeadService(db)
         self.appointment_repo = AppointmentRepository(db)
         self.calendar_service = CalendarService()
+        self.followup_service = FollowUpService(db)
 
     def get_slots(
         self,
@@ -77,6 +79,8 @@ class BookingService:
                 "qualification_status": QualificationStatus.QUALIFIED,
             },
         )
+
+        self.followup_service.cancel_pending_followups_for_lead(lead_id)
 
         return appointment
 
