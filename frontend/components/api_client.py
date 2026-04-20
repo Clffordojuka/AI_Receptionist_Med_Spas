@@ -87,3 +87,28 @@ class APIClient:
     def get_lead_review(self, lead_id: int):
         response = requests.get(f"{self.base_url}/api/admin/leads/{lead_id}/review", timeout=30)
         return self._handle_response(response)
+    
+    def list_leads(
+        self,
+        lead_status: str | None = None,
+        booking_status: str | None = None,
+        qualification_status: str | None = None,
+        handoff_requested: bool | None = None,
+        limit: int = 100,
+    ):
+        params = {"limit": limit}
+        if lead_status:
+            params["lead_status"] = lead_status
+        if booking_status:
+            params["booking_status"] = booking_status
+        if qualification_status:
+            params["qualification_status"] = qualification_status
+        if handoff_requested is not None:
+            params["handoff_requested"] = handoff_requested
+
+        response = requests.get(f"{self.base_url}/api/leads", params=params, timeout=30)
+        return self._handle_response(response)
+
+    def get_dashboard_summary(self):
+        response = requests.get(f"{self.base_url}/api/dashboard/summary", timeout=20)
+        return self._handle_response(response)

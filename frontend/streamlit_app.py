@@ -1,7 +1,12 @@
 import streamlit as st
 
 from frontend.components.api_client import APIClient
-from frontend.components.leads_panel import render_create_lead_panel, render_load_lead_panel
+from frontend.components.leads_panel import (
+    render_create_lead_panel,
+    render_dashboard_summary,
+    render_lead_list_panel,
+    render_load_lead_panel,
+)
 from frontend.components.chat_panel import render_chat_panel
 from frontend.components.booking_panel import render_booking_panel
 from frontend.components.followup_panel import render_followup_panel
@@ -15,7 +20,7 @@ st.set_page_config(
 )
 
 st.title("AI Receptionist Dashboard")
-st.caption("Demo frontend for lead handling, chat, booking, follow-up, and admin workflow.")
+st.caption("Receptionist console for lead intake, chat, booking, follow-up, and escalation.")
 
 default_api_url = st.session_state.get("api_base_url", "http://127.0.0.1:8000")
 
@@ -23,7 +28,6 @@ with st.sidebar:
     st.header("Backend Connection")
     api_base_url = st.text_input("FastAPI Base URL", value=default_api_url)
     st.session_state["api_base_url"] = api_base_url
-
     api_client = APIClient(api_base_url)
 
     if st.button("Check API Health"):
@@ -35,36 +39,41 @@ with st.sidebar:
             st.error(str(exc))
 
     st.divider()
-    st.info("Make sure FastAPI is running before using the dashboard.")
+    st.info("Start FastAPI before opening the workspace.")
 
-tab1, tab2 = st.tabs(["Lead Management", "Receptionist Workspace"])
+overview_tab, workspace_tab = st.tabs(["Overview", "Receptionist Workspace"])
 
-with tab1:
-    col1, col2 = st.columns(2)
+with overview_tab:
+    render_dashboard_summary(api_client)
+
+    col1, col2 = st.columns([1, 1])
     with col1:
         render_create_lead_panel(api_client)
     with col2:
         render_load_lead_panel(api_client)
 
+    st.divider()
+    render_lead_list_panel(api_client)
+
 selected_lead_id = st.session_state.get("selected_lead_id")
 
-with tab2:
+with workspace_tab:
     if not selected_lead_id:
-        st.warning("Create or load a lead first.")
+        st.warning("Select a lead from the Overview tab first.")
     else:
         st.markdown(f"## Working on Lead ID: {selected_lead_id}")
 
-        section1, section2 = st.columns(2)
-        section3, section4 = st.columns(2)
+        top_left, top_right = st.columns(2)
+        bottom_left, bottom_right = st.columns(2)
 
-        with section1:
+        with top_left:
             render_chat_panel(api_client, selected_lead_id)
 
-        with section2:
+        with top_right:
             render_booking_panel(api_client, selected_lead_id)
 
-        with section3:
+        with bottom_left:
             render_followup_panel(api_client, selected_lead_id)
 
-        with section4:
+        with bottom_right:
             render_admin_panel(api_client, selected_lead_id)

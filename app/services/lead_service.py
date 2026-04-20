@@ -35,3 +35,23 @@ class LeadService:
             return lead
 
         return self.repo.update(lead, safe_updates)
+
+    def list_leads(
+        self,
+        *,
+        lead_status: str | None = None,
+        booking_status: str | None = None,
+        qualification_status: str | None = None,
+        handoff_requested: bool | None = None,
+        limit: int = 100,
+    ):
+        return self.repo.list_leads(
+            lead_status=lead_status,
+            booking_status=booking_status,
+            qualification_status=qualification_status,
+            handoff_requested=handoff_requested,
+            limit=limit,
+        )
+
+    def get_dashboard_summary(self):
+        return self.repo.get_dashboard_summary()

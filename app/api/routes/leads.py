@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.api.schemas.lead import LeadCreate, LeadResponse, LeadUpdate
+from app.api.schemas.lead import LeadCreate, LeadListItemResponse, LeadResponse, LeadUpdate
 from app.dependencies import get_db
 from app.services.lead_service import LeadService
 from app.core.exceptions import NotFoundError
@@ -13,6 +13,25 @@ router = APIRouter(prefix="/leads", tags=["Leads"])
 def create_lead(payload: LeadCreate, db: Session = Depends(get_db)):
     service = LeadService(db)
     return service.create_lead(payload)
+
+
+@router.get("", response_model=list[LeadListItemResponse])
+def list_leads(
+    lead_status: str | None = Query(None),
+    booking_status: str | None = Query(None),
+    qualification_status: str | None = Query(None),
+    handoff_requested: bool | None = Query(None),
+    limit: int = Query(100, ge=1, le=500),
+    db: Session = Depends(get_db),
+):
+    service = LeadService(db)
+    return service.list_leads(
+        lead_status=lead_status,
+        booking_status=booking_status,
+        qualification_status=qualification_status,
+        handoff_requested=handoff_requested,
+        limit=limit,
+    )
 
 
 @router.get("/{lead_id}", response_model=LeadResponse)

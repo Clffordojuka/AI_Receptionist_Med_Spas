@@ -26,6 +26,25 @@ class LeadUpdate(BaseModel):
     handoff_requested: bool | None = None
 
 
+class LeadListItemResponse(BaseModel):
+    id: int
+    full_name: str | None
+    phone: str | None
+    email: EmailStr | None
+    source_channel: str
+    service_interest: str | None
+    qualification_status: str
+    booking_status: str
+    lead_status: str
+    assigned_to: str | None
+    handoff_requested: bool
+    updated_at: datetime
+
+    model_config = {
+        "from_attributes": True
+    }
+
+
 class LeadResponse(BaseModel):
     id: int
     full_name: str | None
