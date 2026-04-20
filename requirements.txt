@@ -10,3 +10,4 @@ httpx
 openai
 pytest
 email-validator
+streamlit
