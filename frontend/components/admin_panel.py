@@ -32,7 +32,8 @@ def render_admin_panel(api_client, lead_id: int):
                 elif handoff_requested == "false":
                     payload["handoff_requested"] = False
 
-                result = api_client.update_admin_fields(lead_id, payload)
+                with st.spinner("Updating admin fields..."):
+                    result = api_client.update_admin_fields(lead_id, payload)
                 st.success("Admin fields updated.")
                 st.json(result)
             except Exception as exc:
@@ -51,17 +52,16 @@ def render_admin_panel(api_client, lead_id: int):
                     "admin_notes": escalate_notes or None,
                     "reason": reason or None,
                 }
-                result = api_client.escalate_lead(lead_id, payload)
+                with st.spinner("Escalating lead..."):
+                    result = api_client.escalate_lead(lead_id, payload)
                 st.success("Lead escalated successfully.")
                 st.json(result)
             except Exception as exc:
                 st.error(str(exc))
 
-    if st.button("Refresh Lead Review", key=f"lead_review_{lead_id}"):
-        pass
-
     try:
-        review = api_client.get_lead_review(lead_id)
+        with st.spinner("Loading lead review..."):
+            review = api_client.get_lead_review(lead_id)
         st.markdown("### Lead Review Summary")
         st.json(review)
     except Exception as exc:

@@ -23,8 +23,6 @@ app = FastAPI(
 @app.on_event("startup")
 def on_startup() -> None:
     logger.info("Starting AI Receptionist API...")
-    Base.metadata.create_all(bind=engine)
-    logger.info("Database tables checked/created successfully.")
 
 
 @app.get("/")

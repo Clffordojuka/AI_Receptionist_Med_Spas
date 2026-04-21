@@ -9,11 +9,12 @@ def render_booking_panel(api_client, lead_id: int):
 
     if st.button("Get Available Slots", key=f"get_slots_{lead_id}"):
         try:
-            slots = api_client.get_slots(
-                lead_id=lead_id,
-                service_name=service_name or None,
-                date=date or None,
-            )
+            with st.spinner("Fetching available slots..."):
+                slots = api_client.get_slots(
+                    lead_id=lead_id,
+                    service_name=service_name or None,
+                    date=date or None,
+                )
             st.session_state[f"slots_{lead_id}"] = slots
             st.success("Slots loaded.")
         except Exception as exc:
@@ -38,7 +39,6 @@ def render_booking_panel(api_client, lead_id: int):
         )
 
         selected_slot = next(slot for label, slot in options if label == selected_label)
-
         notes = st.text_area("Booking Notes", key=f"booking_notes_{lead_id}")
 
         if st.button("Create Booking", key=f"create_booking_{lead_id}"):
@@ -50,17 +50,19 @@ def render_booking_panel(api_client, lead_id: int):
                     "provider_name": selected_slot["provider_name"],
                     "notes": notes or None,
                 }
-                result = api_client.create_booking(payload)
+                with st.spinner("Creating booking..."):
+                    result = api_client.create_booking(payload)
                 st.success("Booking created successfully.")
                 st.json(result)
             except Exception as exc:
                 st.error(str(exc))
-
-    if st.button("Refresh Lead Bookings", key=f"refresh_bookings_{lead_id}"):
-        pass
+    else:
+        st.info("No slots loaded yet. Fetch available slots first.")
 
     try:
-        bookings = api_client.get_lead_bookings(lead_id)
+        with st.spinner("Loading bookings..."):
+            bookings = api_client.get_lead_bookings(lead_id)
+
         st.markdown("### Existing Bookings")
         if bookings:
             for booking in bookings:

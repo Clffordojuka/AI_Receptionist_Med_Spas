@@ -8,86 +8,36 @@ class APIClient:
     def _handle_response(self, response: requests.Response):
         try:
             data = response.json()
-        except Exception:
-            response.raise_for_status()
-            return None
+        except ValueError:
+            data = None
 
         if not response.ok:
-            detail = data.get("detail", response.text) if isinstance(data, dict) else response.text
-            raise Exception(f"API Error: {detail}")
+            if isinstance(data, dict):
+                detail = data.get("detail") or data.get("message") or str(data)
+            else:
+                detail = response.text or f"HTTP {response.status_code}"
+            raise Exception(f"API Error ({response.status_code}): {detail}")
 
         return data
 
-    def health(self):
-        response = requests.get(f"{self.base_url}/api/health", timeout=20)
+    def _get(self, path: str, params: dict | None = None, timeout: int = 30):
+        response = requests.get(f"{self.base_url}{path}", params=params, timeout=timeout)
         return self._handle_response(response)
+
+    def _post(self, path: str, payload: dict | None = None, timeout: int = 30):
+        response = requests.post(f"{self.base_url}{path}", json=payload, timeout=timeout)
+        return self._handle_response(response)
+
+    def _patch(self, path: str, payload: dict | None = None, timeout: int = 30):
+        response = requests.patch(f"{self.base_url}{path}", json=payload, timeout=timeout)
+        return self._handle_response(response)
+
+    def health(self):
+        return self._get("/api/health", timeout=20)
 
     def create_lead(self, payload: dict):
-        response = requests.post(f"{self.base_url}/api/leads", json=payload, timeout=30)
-        return self._handle_response(response)
+        return self._post("/api/leads", payload, timeout=30)
 
-    def get_lead(self, lead_id: int):
-        response = requests.get(f"{self.base_url}/api/leads/{lead_id}", timeout=20)
-        return self._handle_response(response)
-
-    def update_lead(self, lead_id: int, payload: dict):
-        response = requests.patch(f"{self.base_url}/api/leads/{lead_id}", json=payload, timeout=30)
-        return self._handle_response(response)
-
-    def send_chat_message(self, payload: dict):
-        response = requests.post(f"{self.base_url}/api/chat/message", json=payload, timeout=60)
-        return self._handle_response(response)
-
-    def get_chat_history(self, lead_id: int):
-        response = requests.get(f"{self.base_url}/api/chat/history/{lead_id}", timeout=30)
-        return self._handle_response(response)
-
-    def get_slots(self, lead_id: int, service_name: str | None = None, date: str | None = None):
-        params = {"lead_id": lead_id}
-        if service_name:
-            params["service_name"] = service_name
-        if date:
-            params["date"] = date
-
-        response = requests.get(f"{self.base_url}/api/bookings/slots", params=params, timeout=30)
-        return self._handle_response(response)
-
-    def create_booking(self, payload: dict):
-        response = requests.post(f"{self.base_url}/api/bookings/create", json=payload, timeout=30)
-        return self._handle_response(response)
-
-    def get_lead_bookings(self, lead_id: int):
-        response = requests.get(f"{self.base_url}/api/bookings/lead/{lead_id}", timeout=20)
-        return self._handle_response(response)
-
-    def create_followup(self, payload: dict):
-        response = requests.post(f"{self.base_url}/api/followups", json=payload, timeout=30)
-        return self._handle_response(response)
-
-    def auto_schedule_followup(self, lead_id: int):
-        response = requests.post(f"{self.base_url}/api/followups/auto/{lead_id}", timeout=30)
-        return self._handle_response(response)
-
-    def run_followups(self):
-        response = requests.post(f"{self.base_url}/api/followups/run", timeout=60)
-        return self._handle_response(response)
-
-    def get_lead_followups(self, lead_id: int):
-        response = requests.get(f"{self.base_url}/api/followups/lead/{lead_id}", timeout=20)
-        return self._handle_response(response)
-
-    def update_admin_fields(self, lead_id: int, payload: dict):
-        response = requests.patch(f"{self.base_url}/api/admin/leads/{lead_id}", json=payload, timeout=30)
-        return self._handle_response(response)
-
-    def escalate_lead(self, lead_id: int, payload: dict):
-        response = requests.post(f"{self.base_url}/api/admin/leads/{lead_id}/escalate", json=payload, timeout=30)
-        return self._handle_response(response)
-
-    def get_lead_review(self, lead_id: int):
-        response = requests.get(f"{self.base_url}/api/admin/leads/{lead_id}/review", timeout=30)
-        return self._handle_response(response)
-    
     def list_leads(
         self,
         lead_status: str | None = None,
@@ -105,10 +55,54 @@ class APIClient:
             params["qualification_status"] = qualification_status
         if handoff_requested is not None:
             params["handoff_requested"] = handoff_requested
+        return self._get("/api/leads", params=params, timeout=30)
 
-        response = requests.get(f"{self.base_url}/api/leads", params=params, timeout=30)
-        return self._handle_response(response)
+    def get_lead(self, lead_id: int):
+        return self._get(f"/api/leads/{lead_id}", timeout=20)
+
+    def update_lead(self, lead_id: int, payload: dict):
+        return self._patch(f"/api/leads/{lead_id}", payload, timeout=30)
+
+    def send_chat_message(self, payload: dict):
+        return self._post("/api/chat/message", payload, timeout=60)
+
+    def get_chat_history(self, lead_id: int):
+        return self._get(f"/api/chat/history/{lead_id}", timeout=30)
+
+    def get_slots(self, lead_id: int, service_name: str | None = None, date: str | None = None):
+        params = {"lead_id": lead_id}
+        if service_name:
+            params["service_name"] = service_name
+        if date:
+            params["date"] = date
+        return self._get("/api/bookings/slots", params=params, timeout=30)
+
+    def create_booking(self, payload: dict):
+        return self._post("/api/bookings/create", payload, timeout=30)
+
+    def get_lead_bookings(self, lead_id: int):
+        return self._get(f"/api/bookings/lead/{lead_id}", timeout=20)
+
+    def create_followup(self, payload: dict):
+        return self._post("/api/followups", payload, timeout=30)
+
+    def auto_schedule_followup(self, lead_id: int):
+        return self._post(f"/api/followups/auto/{lead_id}", timeout=30)
+
+    def run_followups(self):
+        return self._post("/api/followups/run", timeout=60)
+
+    def get_lead_followups(self, lead_id: int):
+        return self._get(f"/api/followups/lead/{lead_id}", timeout=20)
+
+    def update_admin_fields(self, lead_id: int, payload: dict):
+        return self._patch(f"/api/admin/leads/{lead_id}", payload, timeout=30)
+
+    def escalate_lead(self, lead_id: int, payload: dict):
+        return self._post(f"/api/admin/leads/{lead_id}/escalate", payload, timeout=30)
+
+    def get_lead_review(self, lead_id: int):
+        return self._get(f"/api/admin/leads/{lead_id}/review", timeout=30)
 
     def get_dashboard_summary(self):
-        response = requests.get(f"{self.base_url}/api/dashboard/summary", timeout=20)
-        return self._handle_response(response)
+        return self._get("/api/dashboard/summary", timeout=20)

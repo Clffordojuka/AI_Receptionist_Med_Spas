@@ -17,25 +17,31 @@ def render_chat_panel(api_client, lead_id: int):
             st.warning("Enter a message first.")
         else:
             try:
-                result = api_client.send_chat_message(
-                    {
-                        "lead_id": lead_id,
-                        "message": message,
-                        "channel": channel,
-                    }
-                )
+                with st.spinner("Processing message..."):
+                    result = api_client.send_chat_message(
+                        {
+                            "lead_id": lead_id,
+                            "message": message,
+                            "channel": channel,
+                        }
+                    )
                 st.success("Message processed successfully.")
                 st.json(result)
             except Exception as exc:
                 st.error(str(exc))
 
-    if st.button("Refresh Chat History", key=f"refresh_chat_{lead_id}"):
-        pass
-
     try:
-        history = api_client.get_chat_history(lead_id)
+        with st.spinner("Loading chat history..."):
+            history = api_client.get_chat_history(lead_id)
+
+        messages = history.get("messages", [])
         st.markdown("### Conversation History")
-        for item in history.get("messages", []):
+
+        if not messages:
+            st.info("No conversation history yet for this lead.")
+            return
+
+        for item in messages:
             role = item.get("message_role", "unknown").upper()
             channel_name = item.get("channel", "")
             intent = item.get("intent", "")

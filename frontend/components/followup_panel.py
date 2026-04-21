@@ -7,7 +7,8 @@ def render_followup_panel(api_client, lead_id: int):
 
     if st.button("Auto Schedule Follow-Up", key=f"auto_followup_{lead_id}"):
         try:
-            result = api_client.auto_schedule_followup(lead_id)
+            with st.spinner("Scheduling follow-up..."):
+                result = api_client.auto_schedule_followup(lead_id)
             if result:
                 st.success("Follow-up scheduled.")
                 st.json(result)
@@ -35,7 +36,8 @@ def render_followup_panel(api_client, lead_id: int):
                     "message_template": message_template or None,
                     "attempt_number": int(attempt_number),
                 }
-                result = api_client.create_followup(payload)
+                with st.spinner("Creating follow-up job..."):
+                    result = api_client.create_followup(payload)
                 st.success("Manual follow-up created.")
                 st.json(result)
             except Exception as exc:
@@ -43,14 +45,17 @@ def render_followup_panel(api_client, lead_id: int):
 
     if st.button("Run Due Follow-Ups", key=f"run_followups_{lead_id}"):
         try:
-            result = api_client.run_followups()
+            with st.spinner("Running follow-up executor..."):
+                result = api_client.run_followups()
             st.success("Follow-up runner executed.")
             st.json(result)
         except Exception as exc:
             st.error(str(exc))
 
     try:
-        followups = api_client.get_lead_followups(lead_id)
+        with st.spinner("Loading follow-up jobs..."):
+            followups = api_client.get_lead_followups(lead_id)
+
         st.markdown("### Follow-Up Jobs")
         if followups:
             for item in followups:
