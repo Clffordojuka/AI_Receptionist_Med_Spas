@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 
 from frontend.components.api_client import APIClient
@@ -20,26 +21,33 @@ st.set_page_config(
 )
 
 st.title("AI Receptionist Dashboard")
-st.caption("Receptionist console for lead intake, chat, booking, follow-up, and escalation.")
+st.caption(
+    "Manage lead conversations, bookings, follow-ups, and human handoffs from one central workspace."
+)
 
-default_api_url = st.session_state.get("api_base_url", "http://127.0.0.1:8000")
+default_api_url = st.session_state.get(
+    "api_base_url",
+    os.getenv("API_BASE_URL", "http://127.0.0.1:8000"),
+)
 
 with st.sidebar:
-    st.header("Backend Connection")
-    api_base_url = st.text_input("FastAPI Base URL", value=default_api_url)
+    st.header("System Connection")
+    api_base_url = st.text_input("Backend API URL", value=default_api_url)
     st.session_state["api_base_url"] = api_base_url
     api_client = APIClient(api_base_url)
 
-    if st.button("Check API Health"):
+    if st.button("Check Backend Status"):
         try:
             result = api_client.health()
-            st.success("Backend connected.")
+            st.success("Backend connection is active.")
             st.json(result)
         except Exception as exc:
             st.error(str(exc))
 
     st.divider()
-    st.info("Start FastAPI before opening the workspace.")
+    st.info(
+        "Make sure the FastAPI backend is running before using the dashboard workspace."
+    )
 
 overview_tab, workspace_tab = st.tabs(["Overview", "Receptionist Workspace"])
 
@@ -59,9 +67,9 @@ selected_lead_id = st.session_state.get("selected_lead_id")
 
 with workspace_tab:
     if not selected_lead_id:
-        st.warning("Select a lead from the Overview tab first.")
+        st.warning("Select or create a lead from the Overview tab to open the workspace.")
     else:
-        st.markdown(f"## Working on Lead ID: {selected_lead_id}")
+        st.markdown(f"## Active Lead: {selected_lead_id}")
 
         top_left, top_right = st.columns(2)
         bottom_left, bottom_right = st.columns(2)

@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.env
+.venv/
+venv/
+.git/
+.gitignore
+.streamlit/
+pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+postgres_data/

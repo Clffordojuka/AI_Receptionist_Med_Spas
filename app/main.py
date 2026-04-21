@@ -5,9 +5,6 @@ from fastapi import FastAPI
 from app.api.routes import health, leads, chat, faq, bookings, followups, admin, dashboard
 from app.config import get_settings
 from app.core.logging import setup_logging
-from app.db.base import Base
-from app.db.session import engine
-from app.db import models  # noqa: F401
 
 setup_logging()
 logger = logging.getLogger(__name__)
