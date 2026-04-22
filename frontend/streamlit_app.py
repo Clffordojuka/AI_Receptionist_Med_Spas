@@ -1,17 +1,17 @@
 import os
 import streamlit as st
 
-from frontend.components.api_client import APIClient
-from frontend.components.leads_panel import (
+from components.api_client import APIClient
+from components.leads_panel import (
     render_create_lead_panel,
     render_dashboard_summary,
     render_lead_list_panel,
     render_load_lead_panel,
 )
-from frontend.components.chat_panel import render_chat_panel
-from frontend.components.booking_panel import render_booking_panel
-from frontend.components.followup_panel import render_followup_panel
-from frontend.components.admin_panel import render_admin_panel
+from components.chat_panel import render_chat_panel
+from components.booking_panel import render_booking_panel
+from components.followup_panel import render_followup_panel
+from components.admin_panel import render_admin_panel
 
 
 st.set_page_config(
