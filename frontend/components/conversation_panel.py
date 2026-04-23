@@ -1,20 +1,13 @@
 import streamlit as st
 
 
-def render_chat_panel(api_client, lead_id: int):
+def render_conversation_panel(api_client, lead_id: int):
     st.subheader("Conversation")
-    st.caption("Continue the lead conversation and review the interaction history in a receptionist-friendly timeline.")
+    st.caption("Review the conversation history and continue the receptionist interaction.")
 
     col1, col2 = st.columns([3, 1])
-
     with col1:
-        message = st.text_area(
-            "New Message",
-            height=110,
-            placeholder="Type the next receptionist message or customer simulation input here.",
-            key=f"chat_message_{lead_id}",
-        )
-
+        message = st.text_area("New Message", height=100, key=f"chat_message_{lead_id}")
     with col2:
         channel = st.selectbox(
             "Channel",
@@ -27,7 +20,7 @@ def render_chat_panel(api_client, lead_id: int):
             st.warning("Enter a message before sending.")
         else:
             try:
-                with st.spinner("Updating conversation..."):
+                with st.spinner("Processing conversation..."):
                     api_client.send_chat_message(
                         {
                             "lead_id": lead_id,
@@ -35,26 +28,22 @@ def render_chat_panel(api_client, lead_id: int):
                             "channel": channel,
                         }
                     )
-                st.success("Conversation updated successfully.")
+                st.success("Message processed successfully.")
             except Exception as exc:
                 st.error(f"Unable to send message: {exc}")
 
     try:
-        with st.spinner("Loading conversation history..."):
-            history = api_client.get_chat_history(lead_id)
-
+        history = api_client.get_chat_history(lead_id)
         messages = history.get("messages", [])
-        st.markdown("### Conversation Timeline")
 
         if not messages:
-            st.info("No conversation history is available for this lead yet.")
+            st.info("No conversation history yet for this lead.")
             return
 
         for item in messages:
             role = item.get("message_role", "unknown")
-            channel_name = item.get("channel", "")
-            intent = item.get("intent", "")
             text = item.get("message_text", "")
+            intent = item.get("intent", "")
             created_at = item.get("created_at", "")
 
             if role == "user":
@@ -64,10 +53,11 @@ def render_chat_panel(api_client, lead_id: int):
             else:
                 st.markdown(f"**System** · {created_at}")
 
-            if channel_name:
-                st.caption(f"Channel: {channel_name}" + (f" · Intent: {intent}" if intent else ""))
+            if intent:
+                st.caption(f"Intent: {intent}")
 
             st.write(text)
             st.divider()
+
     except Exception as exc:
         st.error(f"Unable to load conversation history: {exc}")
