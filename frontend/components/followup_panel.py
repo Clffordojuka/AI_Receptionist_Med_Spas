@@ -2,24 +2,28 @@ import streamlit as st
 from datetime import datetime, timedelta, timezone
 
 from components.ui_helpers import display_status
+from components.ui_theme import section_header
 
 
 def _render_followup_summary(item: dict):
-    with st.container():
-        st.markdown("#### Follow-Up Task")
-        st.write(f"**Scheduled For:** {item.get('scheduled_for') or 'Not set'}")
-        st.write(f"**Attempt:** {item.get('attempt_number') or 1}")
-        st.write(f"**Status:** {display_status(item.get('status'))}")
-        if item.get("message_template"):
-            st.write(f"**Message:** {item.get('message_template')}")
-        if item.get("executed_at"):
-            st.write(f"**Executed At:** {item.get('executed_at')}")
-        st.divider()
+    st.markdown("#### Follow-Up Task")
+    st.write(f"**Scheduled For:** {item.get('scheduled_for') or 'Not set'}")
+    st.write(f"**Attempt:** {item.get('attempt_number') or 1}")
+    st.write(f"**Status:** {display_status(item.get('status'))}")
+    if item.get("message_template"):
+        st.write(f"**Message:** {item.get('message_template')}")
+    if item.get("executed_at"):
+        st.write(f"**Executed At:** {item.get('executed_at')}")
+    st.divider()
 
 
 def render_followup_panel(api_client, lead_id: int):
-    st.subheader("Follow-Up")
-    st.caption("Keep unbooked leads active with scheduled reminders and follow-up tracking.")
+    section_header(
+        "Follow-Up",
+        "Keep unbooked leads active with reminders and follow-up tracking.",
+    )
+
+    st.markdown('<div class="soft-card">', unsafe_allow_html=True)
 
     if st.button("Schedule Standard Follow-Up", key=f"auto_followup_{lead_id}", type="primary"):
         try:
@@ -28,7 +32,7 @@ def render_followup_panel(api_client, lead_id: int):
             if result:
                 st.success("A follow-up has been scheduled for this lead.")
             else:
-                st.info("No follow-up was scheduled. The lead may already have one pending or may already be booked.")
+                st.info("No follow-up was scheduled.")
         except Exception as exc:
             st.error(f"Unable to schedule follow-up: {exc}")
 
@@ -95,3 +99,5 @@ def render_followup_panel(api_client, lead_id: int):
                 st.info("No follow-up history is available for this lead.")
         except Exception as exc:
             st.error(f"Unable to load follow-up history: {exc}")
+
+    st.markdown("</div>", unsafe_allow_html=True)

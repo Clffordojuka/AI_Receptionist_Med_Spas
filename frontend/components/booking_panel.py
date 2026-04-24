@@ -1,23 +1,27 @@
 import streamlit as st
 
 from components.ui_helpers import display_status
+from components.ui_theme import section_header
 
 
 def _render_booking_summary(booking: dict):
-    with st.container():
-        st.markdown("#### Confirmed Appointment")
-        st.write(f"**Service:** {booking.get('service_name') or 'Not specified'}")
-        st.write(f"**Scheduled Time:** {booking.get('appointment_datetime') or 'Not scheduled'}")
-        st.write(f"**Provider:** {booking.get('provider_name') or 'Not assigned'}")
-        st.write(f"**Status:** {display_status(booking.get('booking_status'))}")
-        if booking.get("notes"):
-            st.write(f"**Notes:** {booking.get('notes')}")
-        st.divider()
+    st.markdown("#### Confirmed Appointment")
+    st.write(f"**Service:** {booking.get('service_name') or 'Not specified'}")
+    st.write(f"**Scheduled Time:** {booking.get('appointment_datetime') or 'Not scheduled'}")
+    st.write(f"**Provider:** {booking.get('provider_name') or 'Not assigned'}")
+    st.write(f"**Status:** {display_status(booking.get('booking_status'))}")
+    if booking.get("notes"):
+        st.write(f"**Notes:** {booking.get('notes')}")
+    st.divider()
 
 
 def render_booking_panel(api_client, lead_id: int):
-    st.subheader("Booking")
-    st.caption("Check availability and confirm the next appointment for this lead.")
+    section_header(
+        "Booking",
+        "Check availability and confirm the next appointment for this lead.",
+    )
+
+    st.markdown('<div class="soft-card">', unsafe_allow_html=True)
 
     service_name = st.text_input(
         "Requested Service",
@@ -102,3 +106,5 @@ def render_booking_panel(api_client, lead_id: int):
                 st.info("No appointment history is available for this lead.")
         except Exception as exc:
             st.error(f"Unable to load appointment history: {exc}")
+
+    st.markdown("</div>", unsafe_allow_html=True)

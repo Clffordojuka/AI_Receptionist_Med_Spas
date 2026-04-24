@@ -1,16 +1,22 @@
 import streamlit as st
 
 from components.ui_helpers import display_status
+from components.ui_theme import section_header
 
 
 def render_admin_panel(api_client, lead_id: int):
-    st.subheader("Staff Actions")
-    st.caption("Assign ownership, add internal notes, and escalate cases that need human review.")
+    section_header(
+        "Staff Actions",
+        "Assign ownership, add internal notes, and escalate sensitive or complex cases for review.",
+    )
+
+    st.markdown('<div class="soft-card">', unsafe_allow_html=True)
 
     try:
         review = api_client.get_lead_review(lead_id)
     except Exception as exc:
         st.error(f"Unable to load lead review details: {exc}")
+        st.markdown("</div>", unsafe_allow_html=True)
         return
 
     st.markdown("### Current Handling Status")
@@ -103,3 +109,5 @@ def render_admin_panel(api_client, lead_id: int):
                     st.success("Lead escalated for human review.")
                 except Exception as exc:
                     st.error(f"Unable to escalate lead: {exc}")
+
+    st.markdown("</div>", unsafe_allow_html=True)

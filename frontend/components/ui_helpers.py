@@ -35,6 +35,22 @@ def display_status(value: str | None) -> str:
         return "Not set"
     return value.replace("_", " ").title()
 
+def status_tone(value: str | None) -> str:
+    if not value:
+        return "neutral"
+
+    value = value.lower()
+
+    if value in {"booked", "confirmed", "qualified"}:
+        return "success"
+    if value in {"pending", "pending_followup", "in_progress", "qualifying"}:
+        return "warning"
+    if value in {"cancelled", "not_qualified", "closed"}:
+        return "danger"
+    if value in {"new", "unknown"}:
+        return "info"
+    return "neutral"
+
 
 def prepare_lead_inbox_dataframe(leads: list[dict]) -> pd.DataFrame:
     rows = []

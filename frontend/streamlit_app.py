@@ -9,6 +9,7 @@ from components.conversation_panel import render_conversation_panel
 from components.booking_panel import render_booking_panel
 from components.followup_panel import render_followup_panel
 from components.admin_panel import render_admin_panel
+from components.ui_theme import inject_dashboard_css
 
 
 st.set_page_config(
@@ -17,12 +18,15 @@ st.set_page_config(
     layout="wide",
 )
 
+inject_dashboard_css()
+
 api_base_url = os.getenv("API_BASE_URL", "http://127.0.0.1:8000")
 api_client = APIClient(api_base_url)
 
 st.title("AI Receptionist Workspace")
-st.caption(
-    "A privacy-aware lead operations workspace for conversations, bookings, follow-ups, and staff handoff."
+st.markdown(
+    '<div class="app-subtitle">A privacy-aware operations workspace for lead handling, bookings, follow-ups, and staff handoff.</div>',
+    unsafe_allow_html=True,
 )
 
 overview_tab, workspace_tab = st.tabs(["Operations Overview", "Lead Workspace"])
@@ -41,12 +45,9 @@ with workspace_tab:
         st.markdown("## Lead Workspace")
         st.caption("Review the active lead, continue the conversation, and complete the next operational action.")
 
-        # Lead summary header
         render_lead_profile_panel(api_client, selected_lead_id)
-
         st.divider()
 
-        # Main working area
         main_col, action_col = st.columns([1.6, 1], gap="large")
 
         with main_col:
@@ -54,7 +55,7 @@ with workspace_tab:
 
         with action_col:
             st.markdown("### Action Center")
-            st.caption("Use the sections below to move the lead forward.")
+            st.caption("Move the lead forward using booking, follow-up, and staff actions.")
             render_booking_panel(api_client, selected_lead_id)
             st.divider()
             render_followup_panel(api_client, selected_lead_id)
