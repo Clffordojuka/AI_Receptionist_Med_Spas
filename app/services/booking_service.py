@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.core.constants import BookingStatus, LeadStatus, QualificationStatus
-from app.core.exceptions import NotFoundError, ValidationError
+from app.core.exceptions import IntegrationError, NotFoundError, ValidationError
 from app.db.repositories.appointment_repository import AppointmentRepository
 from app.db.repositories.lead_repository import LeadRepository
 from app.services.calendar_service import CalendarService
@@ -51,12 +51,15 @@ class BookingService:
         if not service_name:
             raise ValidationError("service_name is required for booking.")
 
-        calendar_result = self.calendar_service.create_calendar_booking(
-            service_name=service_name,
-            appointment_datetime=appointment_datetime,
-            provider_name=provider_name,
-            lead_name=lead.full_name,
-        )
+        try:
+            calendar_result = self.calendar_service.create_calendar_booking(
+                service_name=service_name,
+                appointment_datetime=appointment_datetime,
+                provider_name=provider_name,
+                lead_name=lead.full_name,
+            )
+        except Exception as exc:
+            raise IntegrationError(f"Google Calendar booking failed: {exc}") from exc
 
         appointment = self.appointment_repo.create(
             {

@@ -17,23 +17,44 @@ class CalendarService:
     ) -> list[dict]:
         base_date = self._resolve_base_date(date_str)
 
-        providers = ["Front Desk Team", "Aesthetic Specialist"]
-        hours = [9, 11, 13, 15]
+        candidate_hours = [9, 11, 13, 15]
+        duration = timedelta(minutes=60)
 
-        slots: list[dict] = []
-        for hour in hours:
+        day_start = base_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        day_end = base_date.replace(hour=23, minute=59, second=59, microsecond=0)
+
+        existing_events = self.client.list_events(
+            time_min=day_start,
+            time_max=day_end,
+        )
+
+        busy_ranges = []
+        for event in existing_events:
+            start = event.get("start", {}).get("dateTime")
+            end = event.get("end", {}).get("dateTime")
+            if start and end:
+                busy_ranges.append(
+                    (
+                        datetime.fromisoformat(start),
+                        datetime.fromisoformat(end),
+                    )
+                )
+
+        slots = []
+        for hour in candidate_hours:
             start_dt = base_date.replace(hour=hour, minute=0, second=0, microsecond=0)
-            end_dt = start_dt + timedelta(minutes=60)
+            end_dt = start_dt + duration
 
-            slots.append(
-                {
-                    "start_time": start_dt,
-                    "end_time": end_dt,
-                    "provider_name": providers[hour % len(providers)],
-                    "service_name": service_name,
-                    "available": True,
-                }
-            )
+            if self._is_slot_available(start_dt, end_dt, busy_ranges):
+                slots.append(
+                    {
+                        "start_time": start_dt,
+                        "end_time": end_dt,
+                        "provider_name": "Med Spa Team",
+                        "service_name": service_name,
+                        "available": True,
+                    }
+                )
 
         return slots
 
@@ -73,3 +94,14 @@ class CalendarService:
         if dt.tzinfo is None:
             return dt.replace(tzinfo=self.timezone)
         return dt.astimezone(self.timezone)
+
+    def _is_slot_available(
+        self,
+        start_dt: datetime,
+        end_dt: datetime,
+        busy_ranges: list[tuple[datetime, datetime]],
+    ) -> bool:
+        for busy_start, busy_end in busy_ranges:
+            if start_dt < busy_end and end_dt > busy_start:
+                return False
+        return True

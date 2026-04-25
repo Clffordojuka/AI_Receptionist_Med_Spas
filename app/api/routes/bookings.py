@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.schemas.booking import BookingCreateRequest, BookingResponse, SlotResponse
-from app.core.exceptions import NotFoundError, ValidationError
+from app.core.exceptions import IntegrationError, NotFoundError, ValidationError
 from app.dependencies import get_db
 from app.services.booking_service import BookingService
 
@@ -25,6 +25,8 @@ def get_available_slots(
         )
     except NotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except IntegrationError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
 @router.post("/create", response_model=BookingResponse, status_code=status.HTTP_201_CREATED)
@@ -42,6 +44,8 @@ def create_booking(payload: BookingCreateRequest, db: Session = Depends(get_db))
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValidationError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except IntegrationError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
 @router.get("/lead/{lead_id}", response_model=list[BookingResponse])
