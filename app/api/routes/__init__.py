@@ -1,4 +1,4 @@
-from app.api.routes import health, leads, chat, faq, bookings, followups, admin, dashboard, calendar
+from app.api.routes import health, leads, chat, faq, bookings, followups, admin, dashboard, calendar, messaging
 
 __all__ = [
     "health",
@@ -10,4 +10,5 @@ __all__ = [
     "admin",
     "dashboard",
     "calendar",
+    "messaging",
 ]
